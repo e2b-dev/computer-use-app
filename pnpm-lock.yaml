@@ -14,9 +14,6 @@ dependencies:
   '@ai-sdk/google':
     specifier: ^1.1.10
     version: 1.1.10(zod@3.24.1)
-  '@ai-sdk/mistral':
-    specifier: ^1.1.0
-    version: 1.1.0(zod@3.24.1)
   '@ai-sdk/openai':
     specifier: ^1.0.10
     version: 1.1.0(zod@3.24.1)
@@ -45,8 +42,8 @@ dependencies:
     specifier: ^3.0.0
     version: 3.0.0
   ai:
-    specifier: ^4.1.21
-    version: 4.1.21(react@19.0.0)(zod@3.24.1)
+    specifier: ^4.1.25
+    version: 4.1.25(react@19.0.0)(zod@3.24.1)
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -155,17 +152,6 @@ packages:
     dependencies:
       '@ai-sdk/provider': 1.0.7
       '@ai-sdk/provider-utils': 2.1.6(zod@3.24.1)
-      zod: 3.24.1
-    dev: false
-
-  /@ai-sdk/mistral@1.1.0(zod@3.24.1):
-    resolution: {integrity: sha512-RPOAzk6baQ8R/Cw/N9189tX6CzSOHBNf+r4I5x2H08JCsEx8nycMgwqvVzZ5lhWhaKBvHaD3KoEQSyqyqW82Gg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-    dependencies:
-      '@ai-sdk/provider': 1.0.4
-      '@ai-sdk/provider-utils': 2.1.0(zod@3.24.1)
       zod: 3.24.1
     dev: false
 
@@ -1628,8 +1614,8 @@ packages:
       humanize-ms: 1.2.1
     dev: false
 
-  /ai@4.1.21(react@19.0.0)(zod@3.24.1):
-    resolution: {integrity: sha512-w1v3T/fisoD1qRFz7CS7nE7mggeaxEpkEvWvVUWRem9lERgwh670OPhMPUSrdzTtCjMkOTrNkaecKoYAwvqM/A==}
+  /ai@4.1.25(react@19.0.0)(zod@3.24.1):
+    resolution: {integrity: sha512-gBdx5QqM3EK97F9/opVicP3WMHfiR0/cc96xdNnsFLpcuPBXPtm6lcK56G6ok19+NZggnVcS+KIHzFtp0aHC+g==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19 || ^19.0.0-rc

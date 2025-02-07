@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MoonIcon, SunIcon, RotateCw, StopCircle } from "lucide-react";
+import { MoonIcon, SunIcon, RotateCw, StopCircle, Timer, Plus, Trash2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Message } from "@/components/message";
 import { useScrollToBottom } from "@/components/use-scroll-to-bottom";
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { models } from "@/lib/model-config";
+import { increaseTimeout } from "./actions";
 
 export default function Home() {
   const [desktop, setDesktop] = useState<any>(null);
@@ -25,8 +26,9 @@ export default function Home() {
   const screenshotIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const [selectedModel, setSelectedModel] = useState(models[0].modelId);
   const { theme, setTheme } = useTheme();
+  const [timeRemaining, setTimeRemaining] = useState<number>(300); // 5 minutes in seconds
 
-  const { messages, handleSubmit, input, setInput, isLoading: chatLoading, stop } =
+  const { messages,setMessages, handleSubmit, input, setInput, isLoading: chatLoading, stop } =
     useChat({
       body: {
         modelId: selectedModel,
@@ -72,6 +74,7 @@ export default function Home() {
       try {
         stop();
         await desktop.kill();
+        setMessages([]);
         setDesktop(null);
         setScreenshotData(null);
         if (screenshotIntervalRef.current) {
@@ -96,8 +99,6 @@ export default function Home() {
     };
   }, [desktop, startScreenshotPolling]);
 
-
-
   const startDesktop = async () => {
     setIsLoading(true);
     try {
@@ -114,6 +115,43 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [messagesContainerRef, messagesEndRef] =
     useScrollToBottom<HTMLDivElement>();
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setInput('');
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
+    toast.success("Chat cleared");
+  };
+
+  const handleIncreaseTimeout = async () => {
+    if (!desktop) return;
+    
+    try {
+      const success = await increaseTimeout(desktop.sandboxId);
+      if (success) {
+        setTimeRemaining(300); // Reset to 5 minutes
+        toast.success("Instance time increased");
+      } else {
+        toast.error("Failed to increase time");
+      }
+    } catch (error) {
+      console.error("Failed to increase time:", error);
+      toast.error("Failed to increase time");
+    }
+  };
+
+  useEffect(() => {
+    if (!desktop || timeRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [desktop, timeRemaining]);
 
   return (
     <div className="flex h-dvh bg-[#FFFFFF] dark:bg-[#0A0A0A]">
@@ -133,6 +171,27 @@ export default function Home() {
               </a>
             </h2>
             <div className="flex items-center gap-2">
+              {desktop && (
+                <>
+                  <button
+                    onClick={handleClearChat}
+                    className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+                    title="Clear Chat"
+                  >
+                    <Trash2 className="h-5 w-5 text-[#000000] dark:text-[#FFFFFF]" />
+                  </button>
+                  <button
+                    onClick={handleIncreaseTimeout}
+                    className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors flex items-center gap-1"
+                    title="Increase Time"
+                  >
+                    <Timer className="h-5 w-5 text-[#000000] dark:text-[#FFFFFF]" />
+                    <span className="text-sm text-[#000000] dark:text-[#FFFFFF]">
+                      {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                    </span>
+                  </button>
+                </>
+              )}
               <button
                 onClick={() =>
                   setTheme(theme === "dark" ? "light" : "dark")

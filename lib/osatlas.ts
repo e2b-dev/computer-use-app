@@ -48,7 +48,7 @@ export class OSAtlasProvider {
       });
 
       console.log("OSAtlas API response:", result);
-      
+
       // Updated extraction: use result.data array instead of result[1]
       const bboxResponse = result.data?.[1];
       return this.extractBboxMidpoint(bboxResponse);

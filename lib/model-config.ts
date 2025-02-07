@@ -3,38 +3,46 @@ import { openai } from '@ai-sdk/openai'
 import { google } from '@ai-sdk/google'
 import { customProvider } from 'ai'
 
+const toollist = [
+  "find_item_on_screen",
+  "mouse_move",
+  "mouse_click",
+  "mouse_scroll",
+  "type",
+]
+
 export const models = [
-    {
-        name: "Claude 3.5 Sonnet",
-        modelId: "sonnet",
-        description: "Anthropic Claude 3.5 Sonnet Model",
-        icon: "/anthropic.svg",
-    },
-    {
-        name: "GPT-4o",
-        modelId: "gpt4o",
-        description: "OpenAI's GPT-4o Model",
-        icon: "/openai.svg",
-    },
-    {
-        name: "Gemini 2.0 Flash",
-        modelId: "gemini",
-        description: "Google Gemini 2.0 Flash Model",
-        icon: "/google.svg",
-    }
+  {
+    name: "Claude 3.5 Sonnet",
+    modelId: "sonnet",
+    description: "Anthropic Claude 3.5 Sonnet Model",
+    icon: "/anthropic.svg",
+  },
+  {
+    name: "GPT-4o",
+    modelId: "gpt4o",
+    description: "OpenAI's GPT-4o Model",
+    icon: "/openai.svg",
+  },
+  {
+    name: "Gemini 2.0 Flash",
+    modelId: "gemini",
+    description: "Google Gemini 2.0 Flash Model",
+    icon: "/google.svg",
+  }
 ];
 
 export const e2bDesktop = customProvider({
-    languageModels: {
-        "sonnet": anthropic("claude-3-5-sonnet-20241022"),
-        "gpt4o": openai("gpt-4o"),
-        "gemini": google("gemini-2.0-flash-001")
-    }
+  languageModels: {
+    "sonnet": anthropic("claude-3-5-sonnet-20241022"),
+    "gpt4o": openai("gpt-4o"),
+    "gemini": google("gemini-2.0-flash-001"),
+  }
 });
 
 
 function getsystem(width: number, height: number, modelId: string) {
-    return `\
+  return `\
   <SYSTEM>
   You are a computer use agent on an Ubuntu Linux virtual machine.
   
@@ -59,33 +67,33 @@ function getsystem(width: number, height: number, modelId: string) {
   </TOOLS>
   
   <BROWSER_USAGE>
-  The correct workflow for searching in Firefox:
+  The workflow for searching a query and opening a link in Firefox:
     - Launch Firefox and wait for confirmation:
       - Run firefox-esr in background
       - Take screenshot to verify Firefox is open and ready
     - Check for and handle Firefox first-time setup if present:
       - If setup wizard appears, ignore it and proceed with next steps which is to open a new tab
-    - Open new tab and perform search:
-      - Press Ctrl+T for new tab
-      - Click address bar or ensure it's focused
-      - Type search query
+    - Open new tab and perform search or open a link:
+      - put key text as ctrl+t for new tab
+      - No need to click address bar as it is already focused
+      - Type search query or the link you want to open
       - Press Enter/Return
     - Verify results:
       - Take screenshot to confirm search results loaded
       - Review the actual content visible in screenshot
       - Only then provide information based on what's actually shown
     - For any further navigation:
-     - Take screenshots to confirm page loads
+      - Take screenshots to confirm page loads
       - Verify content before describing it
       - Wait for pages to fully load before interactions
     
     The key points are:
-
-    1. Always verify Firefox is fully loaded before proceeding
-    2. Confirm each step with screenshots
-    3. Only describe what is actually visible in the screenshots
-    4. Wait for pages/content to load completely
-    5. This prevents providing incorrect information and ensures accuracy in responses.
+      1. Always verify Firefox is fully loaded before proceeding
+      2. This workflow is for searching a query and opening a link in Firefox.
+      3. Confirm each step with screenshots
+      4. Only describe what is actually visible in the screenshots
+      5. Wait for pages/content to load completely
+      6. This prevents providing incorrect information and ensures accuracy in responses.
   </BROWSER_USAGE>
   
   <BEST_PRACTICES>
@@ -100,7 +108,7 @@ function getsystem(width: number, height: number, modelId: string) {
 }
 
 export const modelsystemprompt = [{
-    "anthropic": getsystem(1024, 768, "sonnet"),
-    "openai": getsystem(1024, 768, "gpt4o"),
-    "google": getsystem(1024, 768, "gemini")
+  "anthropic": getsystem(1024, 768, "sonnet"),
+  "openai": getsystem(1024, 768, "gpt4o"),
+  "google": getsystem(1024, 768, "gemini"),
 }];

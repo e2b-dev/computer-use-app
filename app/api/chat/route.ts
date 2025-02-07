@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const runningSandboxes = await Sandbox.list();
   const sandboxId = runningSandboxes[0].sandboxId
 
-  const desktop = await Sandbox.connect(sandboxId) 
+  const desktop = await Sandbox.connect(sandboxId)
 
   if (!desktop) {
     return new Response('Desktop not initialized', { status: 500 });
@@ -32,17 +32,34 @@ export async function POST(request: Request) {
     }
   })();
 
-  // take a screenshot and push it to the messages
-  const screenshot = await desktop.takeScreenshot();
-  messages.push({
-    role: 'user',
-    content: [
-      { type: 'text', text: 'Screenshot of the current screen' },
-      { type: 'image', image: Buffer.from(screenshot).toString('base64'), mimeType: 'image/png' },
-    ],
-  });
-  
+  let screenshot;
+
+  try {
+    // take a screenshot and push it to the messages
+    screenshot = await desktop.takeScreenshot();
+    messages.push({
+      role: 'user',
+      content: [
+        { type: 'text', text: 'Screenshot of the current screen' },
+        { type: 'image', image: Buffer.from(screenshot).toString('base64'), mimeType: 'image/png' },
+      ],
+    });
+  } catch (error) {
+    console.error("Error taking screenshot:", error);
+  }
+
   desktop.setTimeout(3_00_000);
+
+  const baseActions = [
+    "screenshot", "type", "cursor_position",
+    "left_click", "right_click", "double_click",
+    "middle_click", "key", "mouse_move",
+    "mouse_scroll"
+  ] as const;
+
+  const actions = modelId === "sonnet" 
+    ? baseActions
+    : [...baseActions, "find_item_on_screen"] as const;
 
   const result = streamText({
     model: e2bDesktop.languageModel(modelId),
@@ -68,30 +85,28 @@ export async function POST(request: Request) {
       computerTool: tool({
         description: "Mouse/keyboard interactions: ",
         parameters: z.object({
-          action: z.enum(
-            [
-              "screenshot", "type", "cursor_position",
-              "left_click", "right_click", "double_click",
-              "middle_click", "key", "mouse_move",
-              "mouse_scroll", "find_item_on_screen"
-            ]
-          ),
+          action: z.enum(actions),
           coordinate: z.array(z.number()).optional().describe("should be used with mouse_move only"),
           text: z.string().optional().describe("should be used with type and key only"),
+          scrollIndex: z.number().default(20).optional().describe("should be used with mouse_scroll only. default is 20"),
         }),
         execute: async (args, { messages }) => {
           console.log("Executing action:", args.action);
-          await sleep(DELAY);
           switch (args.action) {
             case "screenshot": {
-              const data = await desktop.takeScreenshot();
-              messages.push({
-                role: "user",
-                content: [
-                  { type: "text", text: "Screenshot taken" },
-                  { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
-                ]
-              })
+              await sleep(DELAY + 2000);
+              try {
+                const data = await desktop.takeScreenshot();
+                messages.push({
+                  role: "user",
+                  content: [
+                    { type: "text", text: "Screenshot taken" },
+                    { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
+                  ]
+                })
+              } catch (error) {
+                console.error("Error taking screenshot:", error);
+              }
               return { output: "Screenshot taken" };
             }
             case "type": {
@@ -146,11 +161,11 @@ export async function POST(request: Request) {
             }
             case "mouse_scroll": {
               await sleep(DELAY);
-              if (!args.text) {
-                return "no text provided";
+              if (!args.scrollIndex) {
+                return "no scrollIndex provided";
               }
-              const out = await desktop.scroll(Number(args.text));
-              return `scrolled to ${args.text}: ${out}`;
+              const out = await desktop.scroll(Number(args.scrollIndex) || 20);
+              return `scrolled to ${args.scrollIndex}: ${out}`;
             }
             case "find_item_on_screen": {
               if (!args.text) {
@@ -160,18 +175,18 @@ export async function POST(request: Request) {
               const screenshot = await desktop.takeScreenshot();
               const screenshotArray =
                 screenshot instanceof Buffer ? new Uint8Array(screenshot) : screenshot;
-            
+
               const osAtlas = new OSAtlasProvider();
               const position = await osAtlas.call(args.text, screenshotArray);
 
               // uncomment the following lines to use the ShowUIProvider as grounding model
               // const showui = new ShowUIProvider();
               // const position = await showui.call(args.text, screenshotArray);
-            
+
               if (!position) {
                 return "item not found";
               }
-            
+
               return {
                 coordinate: position,
                 message: `Found item at coordinates: ${position[0]}, ${position[1]}`
@@ -207,6 +222,9 @@ export async function POST(request: Request) {
       console.log("Steps ", event.steps);
       console.log("Messages: ", event.response.messages);
     },
+    onError(event) {
+      console.log("Error: ", event.error);
+    }
   });
 
   return result.toDataStreamResponse();
