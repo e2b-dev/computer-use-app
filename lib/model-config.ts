@@ -55,6 +55,7 @@ function getsystem(width: number, height: number, modelId: string) {
   * The current system uses x86_64 architecture
   * You should only run tools step-by-step and wait for the output
   * Never call multiple tools at once
+  * If the user asks to open an application, DO NOT USE THE BASH TOOL! Use the computer tool instead!!
   </SYSTEM_CAPABILITY>
   
   <TOOLS>
