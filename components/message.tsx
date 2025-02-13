@@ -112,37 +112,30 @@ export const Message: React.FC<MessageProps> = ({ role, content, parts }) => {
 
   return (
     <motion.div
-      className={`
-        flex flex-col md:flex-row items-start gap-4 px-6 py-4 my-2 w-full max-w-2xl mx-auto rounded-xl
-        transition-shadow duration-200
-        ${
-          role === "user"
-            ? "bg-[#FFFFFF] dark:bg-[#0A0A0A] border border-[#EBEBEB] dark:border-[#333333] shadow-sm hover:shadow"
-            : role === "assistant"
-            ? "bg-[#FFF3E5] dark:bg-[#1E1E1E] border border-[#FF9F33] dark:border-[#333333] shadow-sm hover:shadow"
-            : "bg-[#F5F5F5] dark:bg-[#333333]"
-        }
-      `}
-      initial={{ y: 5, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex items-start gap-3 rounded-lg ${
+        role === "assistant"
+          ? "bg-[#FFF9F5] dark:bg-[#1A1A1A] p-4"
+          : "opacity-75"
+      }`}
     >
-      <div
-        className={`
-          flex-shrink-0 flex items-center justify-center rounded-full p-2 w-10 h-10
-          ${
-            role === "user"
-              ? "bg-[#EBEBEB] dark:bg-[#333333]"
-              : role === "assistant"
-              ? "bg-[#FFCF99] dark:bg-[#333333]"
-              : ""
-          }
-        `}
-      >
-        {role === "assistant" ? <BotIcon /> : <UserIcon />}
+      <div className="shrink-0">
+        <div
+          className={`
+            w-8 h-8 rounded-lg flex items-center justify-center
+            ${
+              role === "assistant"
+                ? "bg-[#FF8800] text-white"
+                : "bg-[#F5F5F5] dark:bg-[#333333]"
+            }
+          `}
+        >
+          {role === "assistant" ? <BotIcon /> : <UserIcon />}
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0 space-y-2">
+      <div className="flex-1 min-w-0 space-y-3">
         {parts && parts.map((part, index) => renderPart(part, index))}
       </div>
     </motion.div>

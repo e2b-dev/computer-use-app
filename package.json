@@ -24,6 +24,7 @@
     "ai": "^4.1.25",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "e2b": "^1.0.7",
     "framer-motion": "^11.15.0",
     "hls.js": "^1.5.19",
     "lucide-react": "^0.474.0",

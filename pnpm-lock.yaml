@@ -50,6 +50,9 @@ dependencies:
   clsx:
     specifier: ^2.1.1
     version: 2.1.1
+  e2b:
+    specifier: ^1.0.7
+    version: 1.0.7
   framer-motion:
     specifier: ^11.15.0
     version: 11.18.1(react-dom@19.0.0)(react@19.0.0)
