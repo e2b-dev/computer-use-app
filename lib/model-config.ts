@@ -53,6 +53,7 @@ function getsystem(width: number, height: number, modelId: string) {
   * You have full access to a Linux system with internet connectivity.
   * The system is already running and you can interact with it.
   * You have access to GUI applications through X11 display with DISPLAY=:99.
+  ${modelId !== "sonnet" ? '* You can find items on the screen using the find_item_on_screen tool.' : ''}
   * Screen resolution is ${width}x${height}.
   * The system uses x86_64 architecture.
   * You should execute one tool at a time and wait for its output before proceeding.

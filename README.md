@@ -2,81 +2,108 @@
 
 This application allows you to interact with a remote desktop environment using natural language. It leverages the E2B desktop environment and AI models to execute commands and automate tasks.
 
+## Prerequisites
+
+Before starting, you'll need:
+
+1. [Node.js](https://nodejs.org/) 18 or later
+2. [npm](https://www.npmjs.com/) (comes with Node.js)
+3. An [E2B API key](https://e2b.dev/docs/getting-started/api-key)
+4. One of the following AI model API keys:
+   - [Anthropic API key](https://console.anthropic.com/) for Claude 3.5 Sonnet
+   - [OpenAI API key](https://platform.openai.com/api-keys) for GPT-4o
+   - [Google API key](https://aistudio.google.com/apikey) for Gemini 2.0 Flash
+
+## Setup Instructions
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/e2b-dev/e2b_desktop_use_app
+cd e2b_desktop_use_app
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Set up environment variables**
+
+Create a `.env.local` file in the root directory:
+
+```env
+# Required: E2B API keys (both are required)
+E2B_API_KEY=your_e2b_api_key
+NEXT_PUBLIC_E2B_API_KEY=your_e2b_api_key  # Same as E2B_API_KEY
+
+# Optional: AI Model API keys (at least one is required)
+# Choose the model(s) you want to use:
+
+# For Claude 3.5 Sonnet (recommended default)
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# For GPT-4o (alternative)
+OPENAI_API_KEY=your_openai_api_key
+
+# For Gemini 2.0 Flash (alternative)
+GOOGLE_API_KEY=your_google_api_key
+```
+
+Note: 
+- The E2B API keys are required for the desktop environment to work
+- You need at least one AI model API key, but you don't need all of them
+- Claude 3.5 Sonnet is the recommended default model due to its better grounding capabilities
+
+4. **Start the development server**
+```bash
+npm run dev
+```
+
+5. **Open the application**
+
+Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+
 ## Features
--  **Autonomous Desktop AI Agent:** An AI agent that can interact with a remote desktop environment using natural language commands.
--   **AI Model Integration:** Utilizes AI models from Anthropic, OpenAI, and Google to understand and execute user instructions.
--   **Tool Execution:** Executes bash commands and simulates mouse/keyboard interactions.
--   **UI Framework:** Next.js, Tailwind CSS, and shadcn/ui for building the user interface.
 
-## Model Capabilities
-| Model                    | Vision | Action | Grounding                                  |
-| ------------------------ | ------ | ------ | ------------------------------------------ |
-| Claude 3.5 Sonnet (Anthropic) | ✅    | ✅    | ✅                                        |
-| GPT-4o (OpenAI)            | ✅    | ✅    | ShowUI and OS Atlas                        |
-| Gemini 2.0 Flash (Google)  | ✅    | ✅    | ShowUI and OS Atlas                        |                    |
-
-## Architecture
-
-The application consists of the following main components:
-
--   **Frontend (app/page.tsx):**
-    -   React-based UI for user interaction.
-    -   Displays the desktop stream and chat interface.
-    -   Allows users to send messages and execute commands.
--   **Backend (app/api/chat/route.ts):**
-    -   API endpoint for handling chat requests.
-    -   Connects to the E2B desktop environment.
-    -   Integrates with AI models via the Vercel AI SDK(https://sdk.vercel.ai).
-    -   Implements tools for bash command execution and computer interactions.
-    -   Uses `OSAtlasProvider` and `ShowUIProvider` for grounding.
--   **E2B Desktop Integration:**
-    -   Uses the `@e2b/desktop` library to interact with the remote desktop environment.
-    -   Provides functions for taking screenshots, running commands, and simulating user input.
--   **Grounding Providers (lib/osatlas.ts, lib/showui.ts):**
-    -   `OSAtlasProvider`: Uses the OS-Atlas model to find items on the screen.
-    -   `ShowUIProvider`: Uses the ShowUI model to identify UI elements.
--   **Model Configuration (lib/model-config.ts):**
-    -   Defines the available AI models and their configurations.
-    -   Provides system prompts for each model.
-
-## Core Components
-
--   **`DesktopManager`:** Manages the lifecycle of the E2B desktop instance.
--   **`OSAtlasProvider`:** Integrates with the OS-Atlas model to locate items on the screen based on a text query and screenshot.
--   **`ShowUIProvider`:** Integrates with the ShowUI model to identify UI elements and their coordinates.
--   **`modelsystemprompt`:** Defines the system prompts used to guide the AI models, including instructions for tool usage and best practices.
-
-## Tools
-
-The application provides the following tools for interacting with the desktop environment:
-
--   **`bashTool`:** Executes bash commands on the remote desktop.
--   **`computerTool`:** Simulates mouse and keyboard interactions.
-
-## Setup
-
-1.  **Install dependencies:**
-
-    ```bash
-    npm install
-    ```
-
-2.  **Configure E2B:**
-
-    -   Ensure you have an E2B account and API key.
-    -   Set the necessary environment variables for E2B.
-
-3.  **Run the application:**
-
-    ```bash
-    npm run dev
-    ```
+- **Autonomous Desktop AI Agent:** An AI agent that can interact with a remote desktop environment using natural language commands.
+- **AI Model Integration:** Supports multiple AI models:
+  - Claude 3.5 Sonnet (Anthropic)
+  - GPT-4o (OpenAI)
+  - Gemini 2.0 Flash (Google)
+- **Tool Execution:** Executes bash commands and simulates mouse/keyboard interactions.
+- **UI Framework:** Next.js, Tailwind CSS, and shadcn/ui for building the user interface.
 
 ## Usage
 
-1.  Start the application.
-2.  Click the "Start Desktop" button to initialize the remote desktop environment.
-3.  Select an AI model from the dropdown menu.
-4.  Enter your message in the input field and press the send button.
-5.  The AI model will understand your query and execute the appropriate actions on the remote desktop.
-6.  View the desktop stream to see the results of the executed actions.
+1. Click "Start Sandbox" to initialize the remote desktop environment
+2. Select your preferred AI model from the dropdown
+3. Type your instruction in the chat input (e.g., "open Firefox and go to google.com")
+4. Watch as the AI executes your commands in the desktop stream
+
+## Model Capabilities
+
+| Model | Vision | Action | Grounding |
+|-------|---------|---------|------------|
+| Claude 3.5 Sonnet | ✅ | ✅ | ✅ |
+| GPT-4o | ✅ | ✅ | ShowUI and OS Atlas |
+| Gemini 2.0 Flash | ✅ | ✅ | ShowUI and OS Atlas |
+
+## Troubleshooting
+
+- **Sandbox not starting**: Verify your E2B API key is correct in `.env.local`
+- **Model not responding**: Check that you've set up the corresponding API key for your selected model
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+If you encounter any issues or have questions:
+- Check the [E2B Documentation](https://e2b.dev/docs)
+- Join the [E2B Discord](https://discord.gg/U7KEcGErtQ)
+- Open an [issue](https://github.com/e2b-dev/e2b_desktop_use_app/issues)
