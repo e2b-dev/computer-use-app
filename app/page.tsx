@@ -34,6 +34,8 @@ export default function Home() {
       body: {
         modelId: selectedModel,
       },
+      id: sandbox?.sandboxId || 'no-sandbox',
+      api: '/api/chat',
       onError(error) {
         console.error("Failed to send message:", error);
         toast.error(`Failed to send message: ${error.message}`);
@@ -91,10 +93,12 @@ export default function Home() {
       // Start VNC server
       await newSandbox.vncServer.start();
 
+      // Set new sandbox state and clear previous chat messages
       setSandbox(newSandbox);
       setVncUrl(newSandbox.vncServer.getUrl(true));
       setVncPassword(newSandbox.vncServer.password);
       setTimeRemaining(300);
+      setMessages([]);
     } catch (error) {
       console.error("Failed to start sandbox:", error);
       toast.error("Failed to start sandbox");
