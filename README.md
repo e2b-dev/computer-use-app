@@ -1,4 +1,4 @@
-# E2B Desktop Use App
+# Computer Use App
 
 This application allows you to interact with a remote desktop environment using natural language. It leverages the E2B desktop environment and AI models to execute commands and automate tasks.
 
