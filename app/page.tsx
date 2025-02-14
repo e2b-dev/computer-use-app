@@ -186,7 +186,8 @@ export default function Home() {
       {/* Chat Panel */}
       <div className="w-1/3 min-w-[400px] max-w-[500px] bg-[#FFFFFF] dark:bg-[#0A0A0A] border-r border-[#EBEBEB] dark:border-[#333333] flex flex-col">
         <div className="px-6 py-4 border-b border-[#EBEBEB] dark:border-[#333333] bg-[#FCFCFC] dark:bg-[#111111]">
-          <div className="flex items-center justify-between">
+          {/* Title and Theme Row */}
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium">
               Desktop Use App by{' '}
               <span className="text-[#FF8800] inline-flex items-center gap-1">
@@ -201,41 +202,53 @@ export default function Home() {
                 </a>
               </span>
             </h2>
-            <div className="flex items-center gap-2">
-              {sandbox && (
-                <>
-                  <button
-                    onClick={handleClearChat}
-                    className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
-                    title="Clear Chat"
-                  >
-                    <Trash2 className="h-5 w-5 text-[#000000] dark:text-[#FFFFFF]" />
-                  </button>
-                  <button
-                    onClick={handleIncreaseTimeout}
-                    className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors flex items-center gap-1"
-                    title="Increase Time"
-                  >
-                    <Timer className="h-5 w-5 text-[#000000] dark:text-[#FFFFFF]" />
-                    <span className="text-sm text-[#000000] dark:text-[#FFFFFF]">
-                      {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-                    </span>
-                  </button>
-                </>
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+            >
+              {theme === "dark" ? (
+                <SunIcon className="h-5 w-5 text-[#FFFFFF]" />
+              ) : (
+                <MoonIcon className="h-5 w-5 text-[#000000]" />
               )}
+            </button>
+          </div>
+
+          {/* Controls Row */}
+          <div className="flex items-center justify-between">
+            {/* Left side: Timer and Clear */}
+            {sandbox && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleIncreaseTimeout}
+                  className="px-3 py-1.5 bg-[#F5F5F5] dark:bg-[#1A1A1A] hover:bg-[#EBEBEB] dark:hover:bg-[#333333] rounded-lg transition-colors flex items-center gap-2"
+                  title="Increase Time"
+                >
+                  <Timer className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
+                  <span className="text-sm font-medium text-[#000000] dark:text-[#FFFFFF]">
+                    {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                  </span>
+                </button>
+                <button
+                  onClick={handleClearChat}
+                  className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+                  title="Clear Chat"
+                >
+                  <Trash2 className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
+                </button>
+              </div>
+            )}
+            
+            {/* Right side: Stop Instance */}
+            {sandbox && (
               <button
-                onClick={() =>
-                  setTheme(theme === "dark" ? "light" : "dark")
-                }
-                className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+                onClick={stopSandbox}
+                className="px-3 py-1.5 bg-[#1A1A1A] dark:bg-[#333333] hover:bg-[#333333] dark:hover:bg-[#444444] text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
               >
-                {theme === "dark" ? (
-                  <SunIcon className="h-5 w-5 text-[#FFFFFF]" />
-                ) : (
-                  <MoonIcon className="h-5 w-5 text-[#000000]" />
-                )}
+                <Power className="w-4 h-4" />
+                Stop Instance
               </button>
-            </div>
+            )}
           </div>
         </div>
 
@@ -298,17 +311,6 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            {sandbox && (
-              <button
-                type="button"
-                onClick={stopSandbox}
-                className="px-3 py-2 h-9 bg-[#1A1A1A] dark:bg-[#333333] hover:bg-[#333333] dark:hover:bg-[#444444] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-                disabled={!sandbox}
-              >
-                <Power className="w-4 h-4" />
-                Stop Instance
-              </button>
-            )}
           </div>
           <div className="flex items-center gap-3">
             <input
@@ -322,19 +324,20 @@ export default function Home() {
               disabled={chatLoading || !sandbox}
             />
             <button
-              type="submit"
-              className="h-12 w-12 bg-[#FF8800] hover:bg-[#FF8800] text-[#FFFFFF] rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] flex items-center justify-center shadow-sm"
-              disabled={chatLoading || !sandbox}
-            >
-              <PaperPlaneRight className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => stop()}
-              className="h-12 w-12 bg-red-500 hover:bg-red-600 text-[#FFFFFF] rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm"
+              type={chatLoading ? "button" : "submit"}
+              onClick={chatLoading ? () => stop() : undefined}
+              className={`h-12 w-12 text-[#FFFFFF] rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm ${
+                chatLoading 
+                  ? "bg-red-500 hover:bg-red-600" 
+                  : "bg-[#FF8800] hover:bg-[#FF8800] hover:scale-[1.02]"
+              }`}
               disabled={!sandbox}
             >
-              <StopCircle className="w-5 h-5" />
+              {chatLoading ? (
+                <StopCircle className="w-5 h-5" />
+              ) : (
+                <PaperPlaneRight className="w-5 h-5" />
+              )}
             </button>
           </div>
         </form>

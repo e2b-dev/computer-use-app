@@ -60,17 +60,19 @@ function getsystem(width: number, height: number, modelId: string) {
   </SYSTEM_CAPABILITY>
 
   <BROWSER_USAGE>
-  When asked to use Firefox or perform web tasks:
-  1. First, locate and open Firefox if it's not already running
-  2. Take a screenshot to verify Firefox is open
-  3. Skip any welcome screens or prompts:
+  To start Firefox:
+  1. Look for the globe/Firefox icon in the dock at the bottom of the screen, ${modelId !== "sonnet" ? "using the find_item_on_screen action" : "by taking a screenshot"}
+  2. Move the mouse to the Firefox/globe icon
+  3. Click the Firefox icon to launch the browser
+  4. Take a screenshot to verify Firefox is open
+  5. Skip any welcome screens or prompts:
      * Press "Return" or "Escape" to dismiss dialogs
      * Do not import any settings or make Firefox the default browser
-  4. Only after Firefox is fully loaded and ready:
+  6. Only after Firefox is fully loaded and ready:
      * Use "ctrl+l" to focus the address bar
      * Type the URL or search query
      * Press "Return" to navigate
-  5. Wait for pages to load before any further interactions
+  7. Wait for pages to load before any further interactions
   </BROWSER_USAGE>
   
   <BEST_PRACTICES>
@@ -95,7 +97,7 @@ function getsystem(width: number, height: number, modelId: string) {
 }
 
 export const modelsystemprompt = [{
-  "anthropic": getsystem(1024, 768, "sonnet"),
-  "openai": getsystem(1024, 768, "gpt4o"),
-  "google": getsystem(1024, 768, "gemini"),
+  "anthropic": getsystem(800, 600, "sonnet"),
+  "openai": getsystem(800, 600, "gpt4o"),
+  "google": getsystem(800, 600, "gemini"),
 }];
