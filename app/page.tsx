@@ -345,22 +345,22 @@ export default function Home() {
         <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium mb-4">
           Desktop Stream
         </h2>
-        <div className="w-[800px] h-[600px] border border-[#EBEBEB] dark:border-[#333333] rounded-lg overflow-hidden relative bg-[#0A0A0A]">
+        <div className="w-[800px] h-[600px] border border-[#EBEBEB] dark:border-[#333333] rounded-lg overflow-hidden relative bg-[#FFFFFF] dark:bg-[#0A0A0A]">
           {isLoading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#FFFFFF] dark:bg-[#0A0A0A]">
               <div className="flex items-center gap-3">
-                <span className="text-3xl text-primary animate-spin">✶</span>
-                <span className="text-xl font-medium text-primary animate-pulse">
+                <span className="text-3xl text-[#FF8800] animate-spin">✶</span>
+                <span className="text-xl font-medium text-[#FF8800] animate-pulse">
                   Starting instance
                 </span>
-                <span className="text-3xl text-primary animate-spin-reverse">✶</span>
+                <span className="text-3xl text-[#FF8800] animate-spin-reverse">✶</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-1"></span>
-                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-2"></span>
-                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-3"></span>
+                <span className="h-2 w-2 bg-[#FF8800] rounded-full animate-bounce-delay-1"></span>
+                <span className="h-2 w-2 bg-[#FF8800] rounded-full animate-bounce-delay-2"></span>
+                <span className="h-2 w-2 bg-[#FF8800] rounded-full animate-bounce-delay-3"></span>
               </div>
-              <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse mt-2">
+              <p className="text-sm text-[#666666] dark:text-[#999999] animate-pulse mt-2">
                 Preparing your sandbox environment...
               </p>
             </div>
@@ -377,7 +377,7 @@ export default function Home() {
                 onClick={startSandbox}
                 className="px-4 py-2 bg-[#FF8800] hover:bg-[#FF8800] text-[#FFFFFF] rounded-lg transition-colors"
               >
-                Start Instance
+                Start a new Instance
               </button>
             </div>
           )}
