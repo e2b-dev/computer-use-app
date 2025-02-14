@@ -53,30 +53,44 @@ function getsystem(width: number, height: number, modelId: string) {
   * You have full access to a Linux system with internet connectivity.
   * The system is already running and you can interact with it.
   * You have access to GUI applications through X11 display with DISPLAY=:99.
-  ${modelId !== "sonnet" ? '* You can find items on the screen using the find_item_on_screen tool.' : ''}
+  ${modelId !== "sonnet" ? '* You can find items on the screen using the find_item_on_screen action in computer tool.' : ''}
   * Screen resolution is ${width}x${height}.
   * The system uses x86_64 architecture.
   * You should execute one tool at a time and wait for its output before proceeding.
-  * If the user instructs to open an application, use the computer tool to move the mouse, click, and type as needed.
-  * Follow Linux key bindings, such as using "Return" instead of "Enter".
-  * Take screenshots to confirm important actions and verify the state of the GUI.
   </SYSTEM_CAPABILITY>
-  
-  <TOOLS>
-  * Computer tool: Use for mouse movements, click interactions, and keyboard input.
-  </TOOLS>
-  
+
   <BROWSER_USAGE>
-  All interactions within browser applications must be performed using mouse movements, click-based actions, and keyboard input.
+  When asked to use Firefox or perform web tasks:
+  1. First, locate and open Firefox if it's not already running
+  2. Take a screenshot to verify Firefox is open
+  3. Skip any welcome screens or prompts:
+     * Press "Return" or "Escape" to dismiss dialogs
+     * Do not import any settings or make Firefox the default browser
+  4. Only after Firefox is fully loaded and ready:
+     * Use "ctrl+l" to focus the address bar
+     * Type the URL or search query
+     * Press "Return" to navigate
+  5. Wait for pages to load before any further interactions
   </BROWSER_USAGE>
   
   <BEST_PRACTICES>
-  * Perform mouse movements, click actions, and typing on visible and verified GUI elements.
-  * Do not perform scrolling.
-  * Wait for elements to fully load before interacting.
-  * If the target element is unclear, capture a screenshot to verify it before interacting.
-  * Take screenshots to confirm the completion of important actions.
+  * Always verify applications are open before interacting with them
+  * Take screenshots to confirm important states and actions
+  * Use keyboard shortcuts when possible instead of clicking UI elements
+  * For Firefox navigation, only use ctrl+l after confirming browser is ready
+  * Perform mouse movements and clicks only on actual content, not UI elements
+  * Do not perform scrolling
+  * Wait for elements to fully load before interacting
+  * If an action doesn't work, try using keyboard shortcuts first before clicking
   </BEST_PRACTICES>
+
+  <KEY_SHORTCUTS>
+  * ctrl+l: Focus browser address bar (only after Firefox is ready)
+  * Return: Confirm/Enter
+  * Escape: Cancel/Close dialogs
+  * ctrl+w: Close current tab
+  * alt+f4: Close application
+  </KEY_SHORTCUTS>
   </SYSTEM>`;
 }
 

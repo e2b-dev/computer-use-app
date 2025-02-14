@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { MoonIcon, SunIcon, RotateCw, StopCircle, Timer, Plus, Trash2, Copy, Check, Power } from "lucide-react";
+import { useRef, useState } from "react";
+import { MoonIcon, SunIcon, StopCircle, Timer, Trash2, Power } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Message } from "@/components/message";
 import { useScrollToBottom } from "@/components/use-scroll-to-bottom";
@@ -14,7 +14,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { models } from "@/lib/model-config";
 
@@ -22,19 +21,18 @@ export default function Home() {
   const [sandbox, setSandbox] = useState<Sandbox | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [vncUrl, setVncUrl] = useState<string | null>(null);
-  const [vncPassword, setVncPassword] = useState<string | null>(null);
-  const [passwordCopied, setPasswordCopied] = useState(false);
   const [selectedModel, setSelectedModel] = useState(models[0].modelId);
   const { theme, setTheme } = useTheme();
   const [timeRemaining, setTimeRemaining] = useState<number>(300); // 5 minutes in seconds
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { messages, setMessages, handleSubmit, input, setInput, isLoading: chatLoading, stop } =
     useChat({
       body: {
         modelId: selectedModel,
+        sandboxId: sandbox?.sandboxId,
       },
-      id: sandbox?.sandboxId || 'no-sandbox',
       api: '/api/chat',
       onError(error) {
         console.error("Failed to send message:", error);
@@ -43,19 +41,49 @@ export default function Home() {
       maxSteps: 30,
     });
 
-  const copyPasswordToClipboard = useCallback(() => {
-    if (vncPassword) {
-      navigator.clipboard.writeText(vncPassword)
-        .then(() => {
-          setPasswordCopied(true);
-          toast.success("Password copied to clipboard");
-          setTimeout(() => setPasswordCopied(false), 2000);
-        })
-        .catch(() => {
-          toast.error("Failed to copy password");
-        });
+  const startTimer = () => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
-  }, [vncPassword]);
+    
+    // Start new timer
+    timerRef.current = setInterval(async () => {
+      setTimeRemaining(prev => {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
+          // Clear timer and reset everything
+          if (timerRef.current !== null) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+
+          // Reset all states
+          setSandbox(null);
+          setVncUrl(null);
+          setMessages([]);
+          setTimeRemaining(300);
+          stop();
+
+          // Try to cleanup sandbox in background
+          (async () => {
+            try {
+              if (sandbox) {
+                await sandbox.vncServer.stop();
+                await sandbox.kill();
+              }
+            } catch (error) {
+              console.error("Failed to cleanup sandbox:", error);
+            }
+          })();
+
+          toast.error("Instance time expired");
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+  };
 
   const startSandbox = async () => {
     setIsLoading(true);
@@ -85,20 +113,20 @@ export default function Home() {
       const newSandbox = await Sandbox.create("desktop-dev-v2", {
         apiKey,
         resolution: [800, 600],
-        dpi: 86,  // 96 * 0.9 to achieve 90% zoom
-        enableNoVncAuth: true,
+        dpi: 86,
+        enableNoVncAuth: false,
         timeoutMs: 3_00_000
       });
 
       // Start VNC server
       await newSandbox.vncServer.start();
 
-      // Set new sandbox state and clear previous chat messages
+      // Set new sandbox state
       setSandbox(newSandbox);
       setVncUrl(newSandbox.vncServer.getUrl(true));
-      setVncPassword(newSandbox.vncServer.password);
       setTimeRemaining(300);
-      setMessages([]);
+      startTimer();
+
     } catch (error) {
       console.error("Failed to start sandbox:", error);
       toast.error("Failed to start sandbox");
@@ -110,13 +138,18 @@ export default function Home() {
   const stopSandbox = async () => {
     if (sandbox) {
       try {
+        // Clear timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+        
         stop();
         await sandbox.vncServer.stop();
         await sandbox.kill();
         setSandbox(null);
         setVncUrl(null);
-        setVncPassword(null);
         setMessages([]);
+        setTimeRemaining(300);
         toast("Sandbox instance stopped");
       } catch (error) {
         console.error("Failed to stop sandbox:", error);
@@ -130,23 +163,15 @@ export default function Home() {
 
     try {
       await sandbox.setTimeout(3_00_000);
-      setTimeRemaining(300); // Reset to 5 minutes
+      setTimeRemaining(300);
+      // Restart timer with new time
+      startTimer();
       toast.success("Instance time increased");
     } catch (error) {
       console.error("Failed to increase time:", error);
       toast.error("Failed to increase time");
     }
   };
-
-  useEffect(() => {
-    if (!sandbox || timeRemaining <= 0) return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [sandbox, timeRemaining]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
@@ -163,15 +188,18 @@ export default function Home() {
         <div className="px-6 py-4 border-b border-[#EBEBEB] dark:border-[#333333] bg-[#FCFCFC] dark:bg-[#111111]">
           <div className="flex items-center justify-between">
             <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium">
-              Desktop Use App by
-              <a
-                href="https://e2b.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#FF8800] hover:underline pl-1"
-              >
-                E2B.dev
-              </a>
+              Desktop Use App by{' '}
+              <span className="text-[#FF8800] inline-flex items-center gap-1">
+                <span className="text-lg">✶</span>
+                <a
+                  href="https://e2b.dev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  E2B.dev
+                </a>
+              </span>
             </h2>
             <div className="flex items-center gap-2">
               {sandbox && (
@@ -232,20 +260,38 @@ export default function Home() {
         >
           <div className="pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger className="w-fit bg-transparent">
-                  <SelectValue placeholder="Select a model" />
+              <Select 
+                value={selectedModel} 
+                onValueChange={setSelectedModel}
+              >
+                <SelectTrigger className="w-[200px] h-9 bg-transparent border-[#EBEBEB] dark:border-[#333333] rounded-lg hover:bg-[#F5F5F5] dark:hover:bg-[#1A1A1A] transition-colors focus:ring-1 focus:ring-[#FF8800] focus:ring-opacity-50">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={models.find(m => m.modelId === selectedModel)?.icon}
+                      alt=""
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium">
+                      {models.find(m => m.modelId === selectedModel)?.name}
+                    </span>
+                  </div>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#FCFCFC] dark:bg-[#111111] border-[#EBEBEB] dark:border-[#333333]">
                   {models.map((model) => (
-                    <SelectItem key={model.modelId} value={model.modelId}>
+                    <SelectItem 
+                      key={model.modelId} 
+                      value={model.modelId}
+                      className="cursor-pointer hover:bg-[#F5F5F5] dark:hover:bg-[#1A1A1A] focus:bg-[#F5F5F5] dark:focus:bg-[#1A1A1A]"
+                    >
                       <div className="flex items-center gap-2">
                         <img
                           src={model.icon}
-                          alt={model.name}
+                          alt=""
                           className="w-4 h-4"
                         />
-                        <span>{model.name}</span>
+                        <span className="text-sm font-medium">
+                          {model.name}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -294,30 +340,29 @@ export default function Home() {
         </form>
       </div>
 
-      <div className="w-2/3 bg-[#FFFFFF] dark:bg-[#0A0A0A] p-4 flex flex-col items-center">
-        <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium mb-4 flex items-center">
+      {/* Desktop Stream Section */}
+      <div className="flex-1 bg-[#FFFFFF] dark:bg-[#0A0A0A] p-4 flex flex-col items-center justify-center">
+        <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium mb-4">
           Desktop Stream
-          {vncPassword && (
-            <span className="ml-2 text-sm text-gray-500 inline-flex items-center gap-2">
-              Password: {vncPassword}
-              <button
-                onClick={copyPasswordToClipboard}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                title="Copy password"
-              >
-                {passwordCopied ? (
-                  <Check className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </button>
-            </span>
-          )}
         </h2>
-        <div className="w-[800px] h-[600px] border border-[#EBEBEB] dark:border-[#333333] rounded-lg overflow-hidden relative">
+        <div className="w-[800px] h-[600px] border border-[#EBEBEB] dark:border-[#333333] rounded-lg overflow-hidden relative bg-[#0A0A0A]">
           {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center text-[#000000] dark:text-[#FFFFFF]">
-              Starting sandbox...
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl text-primary animate-spin">✶</span>
+                <span className="text-xl font-medium text-primary animate-pulse">
+                  Starting instance
+                </span>
+                <span className="text-3xl text-primary animate-spin-reverse">✶</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-1"></span>
+                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-2"></span>
+                <span className="h-2 w-2 bg-primary rounded-full animate-bounce-delay-3"></span>
+              </div>
+              <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse mt-2">
+                Preparing your sandbox environment...
+              </p>
             </div>
           ) : sandbox && vncUrl ? (
             <iframe
@@ -332,7 +377,7 @@ export default function Home() {
                 onClick={startSandbox}
                 className="px-4 py-2 bg-[#FF8800] hover:bg-[#FF8800] text-[#FFFFFF] rounded-lg transition-colors"
               >
-                Start Sandbox
+                Start Instance
               </button>
             </div>
           )}
