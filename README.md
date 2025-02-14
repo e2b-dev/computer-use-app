@@ -18,8 +18,8 @@ Before starting, you'll need:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/e2b-dev/e2b_desktop_use_app
-cd e2b_desktop_use_app
+git clone https://github.com/e2b-dev/computer-use-app
+cd computer-use-app
 ```
 
 2. **Install dependencies**
@@ -106,4 +106,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 If you encounter any issues or have questions:
 - Check the [E2B Documentation](https://e2b.dev/docs)
 - Join the [E2B Discord](https://discord.gg/U7KEcGErtQ)
-- Open an [issue](https://github.com/e2b-dev/e2b_desktop_use_app/issues)
+- Open an [issue](https://github.com/e2b-dev/computer-use-app/issues)

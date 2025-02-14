@@ -189,7 +189,7 @@ export default function Home() {
           {/* Title and Theme Row */}
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[#000000] dark:text-[#FFFFFF] font-medium">
-              Desktop Use App by{' '}
+              Computer Use App by{' '}
               <span className="text-[#FF8800] inline-flex items-center gap-1">
                 <span className="text-lg">✶</span>
                 <a
