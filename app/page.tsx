@@ -32,7 +32,7 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  const { messages, setMessages, handleSubmit, input, setInput, isLoading: chatLoading, stop } =
+  const { messages, setMessages, handleSubmit, input, setInput, isLoading: chatLoading, stop, reload, append } =
     useChat({
       body: {
         modelId: selectedModel,
@@ -42,9 +42,12 @@ export default function Home() {
       onError(error) {
         console.error("Failed to send message:", error);
         if (error.message.includes("rate limit")) {
-          toast.error("Rate limit reached. Please wait a few seconds and try again.");
+          toast.error("Rate limit reached. Please wait a few seconds and we will try again.");
           setTimeout(() => {
-            handleSubmit(new Event('submit') as any);
+            append({
+              role: 'user',
+              content: "Please continue the task.",
+            });
           }, 2000);
         } else {
           toast.error(`Failed to send message: ${error.message}`);
