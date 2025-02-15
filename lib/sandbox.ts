@@ -1,3 +1,4 @@
+// orignally written by @synacktraa: https://github.com/synacktraa/desktop/tree/dev
 import {
     Sandbox as SandboxBase,
     SandboxOpts as SandboxOptsBase,
