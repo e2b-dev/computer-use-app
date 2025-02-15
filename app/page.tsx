@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { MoonIcon, SunIcon, StopCircle, Timer, Trash2, Power } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Message } from "@/components/message";
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { models } from "@/lib/model-config";
+import { createSandbox, increaseTimeout, stopSandboxAction } from "@/app/actions";
 
 export default function Home() {
   const [sandbox, setSandbox] = useState<Sandbox | null>(null);
@@ -25,7 +26,11 @@ export default function Home() {
   const { theme, setTheme } = useTheme();
   const [timeRemaining, setTimeRemaining] = useState<number>(300); // 5 minutes in seconds
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { messages, setMessages, handleSubmit, input, setInput, isLoading: chatLoading, stop } =
     useChat({
@@ -36,97 +41,26 @@ export default function Home() {
       api: '/api/chat',
       onError(error) {
         console.error("Failed to send message:", error);
-        toast.error(`Failed to send message: ${error.message}`);
+        if (error.message.includes("rate limit")) {
+          toast.error("Rate limit reached. Please wait a few seconds and try again.");
+          setTimeout(() => {
+            handleSubmit(new Event('submit') as any);
+          }, 2000);
+        } else {
+          toast.error(`Failed to send message: ${error.message}`);
+        }
       },
       maxSteps: 30,
     });
 
-  const startTimer = () => {
-    // Clear any existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    
-    // Start new timer
-    timerRef.current = setInterval(async () => {
-      setTimeRemaining(prev => {
-        const newTime = prev - 1;
-        if (newTime <= 0) {
-          // Clear timer and reset everything
-          if (timerRef.current !== null) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-          }
-
-          // Reset all states
-          setSandbox(null);
-          setVncUrl(null);
-          setMessages([]);
-          setTimeRemaining(300);
-          stop();
-
-          // Try to cleanup sandbox in background
-          (async () => {
-            try {
-              if (sandbox) {
-                await sandbox.vncServer.stop();
-                await sandbox.kill();
-              }
-            } catch (error) {
-              console.error("Failed to cleanup sandbox:", error);
-            }
-          })();
-
-          toast.error("Instance time expired");
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-  };
-
   const startSandbox = async () => {
     setIsLoading(true);
     try {
-      const apiKey = process.env.NEXT_PUBLIC_E2B_API_KEY!;
-      if (!apiKey) {
-        throw new Error('E2B API key not found');
-      }
-
-      // Kill any existing sandboxes
-      try {
-        const runningSandboxes = await Sandbox.list({ apiKey });
-        for (const sandboxInfo of runningSandboxes) {
-          try {
-            const sandbox = await Sandbox.connect(sandboxInfo.sandboxId);
-            await sandbox.kill();
-            console.log(`Killed running sandbox: ${sandboxInfo.sandboxId}`);
-          } catch (error) {
-            console.error(`Failed to kill running sandbox (${sandboxInfo.sandboxId}):`, error);
-          }
-        }
-      } catch (error) {
-        console.error('Error listing running sandboxes:', error);
-      }
-
-      // Create new sandbox instance
-      const newSandbox = await Sandbox.create("desktop-dev-v2", {
-        apiKey,
-        resolution: [800, 600],
-        dpi: 86,
-        enableNoVncAuth: false,
-        timeoutMs: 3_00_000
-      });
-
-      // Start VNC server
-      await newSandbox.vncServer.start();
-
-      // Set new sandbox state
+      const { sandboxId, vncUrl } = await createSandbox();
+      const newSandbox = await Sandbox.connect(sandboxId);
       setSandbox(newSandbox);
-      setVncUrl(newSandbox.vncServer.getUrl(true));
+      setVncUrl(vncUrl);
       setTimeRemaining(300);
-      startTimer();
-
     } catch (error) {
       console.error("Failed to start sandbox:", error);
       toast.error("Failed to start sandbox");
@@ -138,19 +72,17 @@ export default function Home() {
   const stopSandbox = async () => {
     if (sandbox) {
       try {
-        // Clear timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-        
         stop();
-        await sandbox.vncServer.stop();
-        await sandbox.kill();
-        setSandbox(null);
-        setVncUrl(null);
-        setMessages([]);
-        setTimeRemaining(300);
-        toast("Sandbox instance stopped");
+        const success = await stopSandboxAction(sandbox.sandboxId);
+        if (success) {
+          setSandbox(null);
+          setVncUrl(null);
+          setMessages([]);
+          setTimeRemaining(300);
+          toast("Sandbox instance stopped");
+        } else {
+          toast.error("Failed to stop sandbox instance");
+        }
       } catch (error) {
         console.error("Failed to stop sandbox:", error);
         toast.error("Failed to stop sandbox");
@@ -162,10 +94,8 @@ export default function Home() {
     if (!sandbox) return;
 
     try {
-      await sandbox.setTimeout(3_00_000);
+      await increaseTimeout(sandbox.sandboxId);
       setTimeRemaining(300);
-      // Restart timer with new time
-      startTimer();
       toast.success("Instance time increased");
     } catch (error) {
       console.error("Failed to increase time:", error);
@@ -180,6 +110,56 @@ export default function Home() {
     setMessages([]);
     toast.success("Chat cleared");
   };
+
+  const ThemeToggle = () => (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+    >
+      {theme === "dark" ? (
+        <SunIcon className="h-5 w-5 text-[#FFFFFF]" />
+      ) : (
+        <MoonIcon className="h-5 w-5 text-[#000000]" />
+      )}
+    </button>
+  );
+
+  useEffect(() => {
+    if (!sandbox) return;
+    const interval = setInterval(() => {
+      if (!chatLoading) {
+        setTimeRemaining(prev => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sandbox, chatLoading]);
+
+  useEffect(() => {
+    if (!sandbox) return;
+
+    if (timeRemaining === 10) {
+      handleIncreaseTimeout();
+    }
+
+    if (timeRemaining === 0) {
+      (async () => {
+        try {
+          const desktop = await Sandbox.connect(sandbox.sandboxId);
+          await desktop.vncServer.stop();
+          await desktop.kill();
+        } catch (error) {
+          console.error("Failed to cleanup sandbox:", error);
+        }
+      })();
+
+      setSandbox(null);
+      setVncUrl(null);
+      setMessages([]);
+      stop();
+      toast.error("Instance time expired");
+      setTimeRemaining(300);
+    }
+  }, [timeRemaining, sandbox, stop, chatLoading]);
 
   return (
     <div className="flex h-dvh bg-[#FFFFFF] dark:bg-[#0A0A0A]">
@@ -202,16 +182,7 @@ export default function Home() {
                 </a>
               </span>
             </h2>
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
-            >
-              {theme === "dark" ? (
-                <SunIcon className="h-5 w-5 text-[#FFFFFF]" />
-              ) : (
-                <MoonIcon className="h-5 w-5 text-[#000000]" />
-              )}
-            </button>
+            <ThemeToggle />
           </div>
 
           {/* Controls Row */}

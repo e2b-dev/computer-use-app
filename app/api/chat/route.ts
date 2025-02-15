@@ -205,7 +205,12 @@ export async function POST(request: Request) {
       return result.toDataStreamResponse();
     } catch (error) {
       console.error("Error streaming response:", error);
-      return new Response("Rate limit reached or internal error, please try again later", { status: 429 });
+      if (error instanceof Error && error.message.includes('rate limit')) {
+        return new Response("Rate limit reached. Please wait a few seconds and try again.", 
+          { status: 429 });
+      }
+      return new Response("An error occurred. Please try again.", 
+        { status: 500 });
     }
   } catch (error) {
     console.error("Error connecting to sandbox:", error);

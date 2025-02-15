@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Metadata } from "next";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "next-themes";
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
   title: "E2B Desktop Use App",
@@ -11,16 +11,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <body suppressHydrationWarning>
+        <Providers>
           <Toaster position="top-center" richColors />
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
