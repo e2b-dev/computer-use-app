@@ -107,9 +107,9 @@ export async function POST(request: Request) {
                     })
                     confirmation = await generateText({
                       model: e2bDesktop.languageModel(modelId),
-                      system: `You are a screenshot confirmation assistant. 
-                      You will be given a screenshot and a message. 
-                      You need to confirm and answer the user's question.`,
+                      system: `You are a screenshot confirmation or data extraction assistant. 
+                      You will be given the entire conversation history and the screenshot.
+                      You need to confirm the action's success or provide answer the user's question.`,
                       temperature: 0,
                       messages: convertToCoreMessages(messages),
                     })
