@@ -50,6 +50,9 @@ OPENAI_API_KEY=your_openai_api_key
 
 # For Gemini 2.0 Flash (alternative)
 GOOGLE_API_KEY=your_google_api_key
+
+# For Grok 2.0 (alternative)
+XAI_API_KEY=your_grok_api_key
 ```
 
 Note: 
