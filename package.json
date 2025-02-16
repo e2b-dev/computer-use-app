@@ -14,6 +14,7 @@
     "@ai-sdk/google": "^1.1.10",
     "@ai-sdk/openai": "^1.0.10",
     "@ai-sdk/ui-utils": "^1.1.10",
+    "@ai-sdk/xai": "^1.1.10",
     "@anthropic-ai/sdk": "^0.33.1",
     "@e2b/desktop": "^1.0.3",
     "@gradio/client": "^1.10.0",

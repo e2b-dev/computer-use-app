@@ -1,15 +1,8 @@
 import { anthropic } from '@ai-sdk/anthropic'
 import { openai } from '@ai-sdk/openai'
 import { google } from '@ai-sdk/google'
+import { xai } from '@ai-sdk/xai'
 import { customProvider } from 'ai'
-
-const toollist = [
-  "find_item_on_screen",
-  "mouse_move",
-  "mouse_click",
-  "mouse_scroll",
-  "type",
-]
 
 export const models = [
   {
@@ -29,6 +22,12 @@ export const models = [
     modelId: "gemini",
     description: "Google Gemini 2.0 Flash Model",
     icon: "/google.svg",
+  },
+  {
+    name: "Grok 2 Vision",
+    modelId: "grok",
+    description: "XAI Grok 2 Vision Model",
+    icon: "/xai.svg",
   }
 ];
 
@@ -37,6 +36,7 @@ export const e2bDesktop = customProvider({
     "sonnet": anthropic("claude-3-5-sonnet-20241022"),
     "gpt4o": openai("gpt-4o"),
     "gemini": google("gemini-2.0-flash-001"),
+    "grok": xai("grok-2-vision-1212"),
   }
 });
 
@@ -73,9 +73,18 @@ function getsystem(width: number, height: number, modelId: string) {
      * Type the URL or search query
      * Press "Return" to navigate
   7. Wait for pages to load before any further interactions
+  8. Answer the user's query based on the information you see on the screen using the response guidelines below.
   </BROWSER_USAGE>
+
+  <RESPONSE_GUIDELINES>
+  * Always respond with the exact text you see on the screen based on the action you performed and the user's query.
+  * Do not hallucinate or make up information.
+  * If you cannot find the information, respond with "I cannot find the information on the screen."
+  </RESPONSE_GUIDELINES>
   
   <BEST_PRACTICES>
+  * Never make the user perform any actions.
+  * Always perform actions yourself using the tools provided.
   * Always verify applications are open before interacting with them
   * Take screenshots to confirm important states and actions
   * Use keyboard shortcuts when possible instead of clicking UI elements

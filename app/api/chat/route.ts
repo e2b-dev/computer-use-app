@@ -1,5 +1,5 @@
 import { Desktop } from '@/lib/sandbox'
-import { convertToCoreMessages, streamText, tool } from "ai";
+import { convertToCoreMessages, generateText, streamText, tool } from "ai";
 import { z } from 'zod';
 import { OSAtlasProvider } from '@/lib/osatlas';
 import { e2bDesktop, modelsystemprompt } from '@/lib/model-config';
@@ -62,6 +62,15 @@ export async function POST(request: Request) {
       ? baseActions
       : [...baseActions, "find_item_on_screen"] as const;
 
+    const data = await desktop.takeScreenshot();
+    messages.push({
+      role: "user",
+      content: [
+        { type: "text", text: "Screenshot taken" },
+        { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
+      ]
+    })
+
     try {
       const result = streamText({
         model: e2bDesktop.languageModel(modelId),
@@ -78,14 +87,15 @@ export async function POST(request: Request) {
               text: z.string().optional().describe("should be used with type and key only"),
               scrollDirection: z.enum(["up", "down"]).optional().describe("should be used with mouse_scroll only. default is down"),
             }),
-            execute: async (args, { messages }) => {
+            execute: async (args) => {
               console.log("Executing action:", args.action);
-              
+
               // Add delay before each action
               await sleep(ACTION_DELAY_MS);
-              
+
               switch (args.action) {
                 case "screenshot": {
+                  let confirmation;
                   try {
                     const data = await desktop.takeScreenshot();
                     messages.push({
@@ -95,10 +105,19 @@ export async function POST(request: Request) {
                         { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
                       ]
                     })
+                    confirmation = await generateText({
+                      model: e2bDesktop.languageModel(modelId),
+                      system: `You are a screenshot confirmation assistant. 
+                      You will be given a screenshot and a message. 
+                      You need to confirm and answer the user's question.`,
+                      temperature: 0,
+                      messages: convertToCoreMessages(messages),
+                    })
                   } catch (error) {
                     console.error("Error taking screenshot:", error);
+                    return { output: "Error taking screenshot" };
                   }
-                  return { output: "Screenshot taken" };
+                  return { output: "Screenshot taken", confirmation: confirmation.text };
                 }
                 case "type": {
                   if (!args.text) {
@@ -111,11 +130,11 @@ export async function POST(request: Request) {
                   return desktop.getCursorPosition();
                 }
                 case "left_click": {
-                  const out = await desktop.leftClick();
-                  return `left click performed: ${out}`;
+                  await desktop.leftClick();
+                  return `left click performed!`;
                 }
                 case "right_click": {
-                  const out = await desktop.rightClick();
+                  await desktop.rightClick();
                   return `right click performed!`;
                 }
                 case "double_click": {
@@ -206,10 +225,10 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error("Error streaming response:", error);
       if (error instanceof Error && error.message.includes('rate limit')) {
-        return new Response("Rate limit reached. Please wait a few seconds and try again.", 
+        return new Response("Rate limit reached. Please wait a few seconds and try again.",
           { status: 429 });
       }
-      return new Response("An error occurred. Please try again.", 
+      return new Response("An error occurred. Please try again.",
         { status: 500 });
     }
   } catch (error) {
