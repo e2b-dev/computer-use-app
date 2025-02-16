@@ -34,7 +34,6 @@ Create a `.env.local` file in the root directory:
 ```env
 # Required: E2B API keys (both are required)
 E2B_API_KEY=your_e2b_api_key
-NEXT_PUBLIC_E2B_API_KEY=your_e2b_api_key  # Same as E2B_API_KEY
 
 # Optional: AI Model API keys (at least one is required)
 # Choose the model(s) you want to use:
