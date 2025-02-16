@@ -90,6 +90,7 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 | Claude 3.5 Sonnet | ✅ | ✅ | ✅ |
 | GPT-4o | ✅ | ✅ | ShowUI and OS Atlas |
 | Gemini 2.0 Flash | ✅ | ✅ | ShowUI and OS Atlas |
+| Grok 2.0 | ✅ | ✅ | ShowUI and OS Atlas |
 
 ## Troubleshooting
 
