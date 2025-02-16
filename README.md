@@ -2,6 +2,10 @@
 
 This application allows you to interact with a remote desktop environment using natural language. It leverages the E2B desktop environment and AI models to execute commands and automate tasks.
 
+
+https://github.com/user-attachments/assets/9f1a22ff-eba4-451f-adec-d9cc3c9763aa
+
+
 ## Prerequisites
 
 Before starting, you'll need:
