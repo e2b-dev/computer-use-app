@@ -36,7 +36,7 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```env
-# Required: E2B API keys (both are required)
+# Required: E2B API key
 E2B_API_KEY=your_e2b_api_key
 
 # Optional: AI Model API keys (at least one is required)
