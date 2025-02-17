@@ -93,7 +93,7 @@ function getsystem(width: number, height: number, modelId: string) {
 
   <BROWSER_USAGE>
   To start Firefox:
-  1. Look for the globe/Firefox icon in the dock at the bottom of the screen, ${modelId !== "sonnet" ? "using the find_item_on_screen action" : "by taking a screenshot"}
+  1. Look for the globe/Firefox icon in the dock at the bottom of the screen, ${modelId !== "sonnet" ? "using the find_item_on_screen action in computerTool tool" : "by taking a screenshot"}
   2. Move the mouse to the Firefox/globe icon
   3. Click the Firefox icon to launch the browser
   4. Take a screenshot to verify Firefox is open
