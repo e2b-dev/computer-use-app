@@ -17,6 +17,9 @@ Before starting, you'll need:
    - [Anthropic API key](https://console.anthropic.com/) for Claude 3.5 Sonnet
    - [OpenAI API key](https://platform.openai.com/api-keys) for GPT-4o
    - [Google API key](https://aistudio.google.com/apikey) for Gemini 2.0 Flash
+   - [XAI API key](https://console.x.ai/) for Grok 2 Vision
+   - [Mistral API key](https://console.mistral.ai/) for Mistral Large
+   - [Groq API key](https://console.groq.com/) for Llama 3.3 70B
 
 ## Setup Instructions
 
@@ -53,6 +56,12 @@ GOOGLE_API_KEY=your_google_api_key
 
 # For Grok 2.0 (alternative)
 XAI_API_KEY=your_grok_api_key
+
+# For Mistral Large (alternative)
+MISTRAL_API_KEY=your_mistral_api_key
+
+# For Llama 3.3 70B (alternative)
+GROQ_API_KEY=your_groq_api_key
 ```
 
 Note: 
@@ -76,12 +85,15 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
   - Claude 3.5 Sonnet (Anthropic)
   - GPT-4o (OpenAI)
   - Gemini 2.0 Flash (Google)
+  - Grok 2 Vision (XAI)
+  - Mistral Large (Mistral)
+  - Llama 3.3 70B (Groq)
 - **Tool Execution:** Executes bash commands and simulates mouse/keyboard interactions.
 - **UI Framework:** Next.js, Tailwind CSS, and shadcn/ui for building the user interface.
 
 ## Usage
 
-1. Click "Start Sandbox" to initialize the remote desktop environment
+1. Click "Start Instance" to initialize the remote desktop environment
 2. Select your preferred AI model from the dropdown
 3. Type your instruction in the chat input (e.g., "open Firefox and go to google.com")
 4. Watch as the AI executes your commands in the desktop stream
@@ -94,6 +106,8 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 | GPT-4o | ✅ | ✅ | ShowUI and OS Atlas |
 | Gemini 2.0 Flash | ✅ | ✅ | ShowUI and OS Atlas |
 | Grok 2.0 | ✅ | ✅ | ShowUI and OS Atlas |
+| Mistral Large | Pixtral Large | ✅ | ShowUI and OS Atlas |
+| Llama 3.3 70B | Llama 3.2 90B Vision | ✅ | ShowUI and OS Atlas |
 
 ## Troubleshooting
 

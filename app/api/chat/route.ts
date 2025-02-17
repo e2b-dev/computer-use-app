@@ -1,8 +1,8 @@
 import { Desktop } from '@/lib/sandbox'
-import { convertToCoreMessages, generateText, streamText, tool } from "ai";
+import { convertToCoreMessages, generateText, streamText, tool, CoreMessage } from "ai";
 import { z } from 'zod';
 import { OSAtlasProvider } from '@/lib/osatlas';
-import { e2bDesktop, modelsystemprompt } from '@/lib/model-config';
+import { e2bDesktop, modelsystemprompt, models } from '@/lib/model-config';
 import { ShowUIProvider } from '@/lib/showui';
 
 const TIMEOUT_MS = 600000;
@@ -45,7 +45,10 @@ export async function POST(request: Request) {
         case "sonnet": return modelsystemprompt[0].anthropic;
         case "gpt4o": return modelsystemprompt[0].openai;
         case "gemini": return modelsystemprompt[0].google;
-        default: return modelsystemprompt[0].anthropic;
+        case "grok": return modelsystemprompt[0].xai;
+        case "mistral": return modelsystemprompt[0].mistral
+        case "llama": return modelsystemprompt[0].llama
+        default: return modelsystemprompt[0].openai;
       }
     })();
 
@@ -62,14 +65,16 @@ export async function POST(request: Request) {
       ? baseActions
       : [...baseActions, "find_item_on_screen"] as const;
 
-    const data = await desktop.takeScreenshot();
-    messages.push({
-      role: "user",
-      content: [
-        { type: "text", text: "Screenshot taken" },
-        { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
-      ]
-    })
+    if (models.find(m => m.modelId === modelId)?.vision) {
+      const data = await desktop.takeScreenshot();
+      messages.push({
+        role: "user",
+        content: [
+          { type: "text", text: "Screenshot taken" },
+          { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
+        ]
+      })
+    }
 
     try {
       const result = streamText({
@@ -95,23 +100,44 @@ export async function POST(request: Request) {
 
               switch (args.action) {
                 case "screenshot": {
+                  await sleep(ACTION_DELAY_MS);
+
                   let confirmation;
                   try {
+
+                    const visionModel = models.find(m => m.modelId === modelId)?.vision_model;
+                    if (!visionModel) {
+                      return { output: "Model not found" };
+                    }
                     const data = await desktop.takeScreenshot();
-                    messages.push({
-                      role: "user",
-                      content: [
-                        { type: "text", text: "Screenshot taken" },
-                        { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
-                      ]
-                    })
+
+                    // map messages and and extract the messages with user and assistant role and their stringcontent
+                    const coreMessages = messages.map((m: CoreMessage) => ({
+                      role: m.role,
+                      content: typeof m.content === 'string' ? m.content : undefined
+                    }));
+
                     confirmation = await generateText({
-                      model: e2bDesktop.languageModel(modelId),
-                      system: `You are a screenshot confirmation or data extraction assistant. 
-                      You will be given the entire conversation history and the screenshot.
-                      You need to confirm the action's success or provide answer the user's question.`,
-                      temperature: 0,
-                      messages: convertToCoreMessages(messages),
+                      model: e2bDesktop.languageModel(visionModel),
+                      temperature: 1,
+                      messages: [
+                        {
+                          role: modelId === "llama" ? "user" : "system",
+                          content: `You are a screenshot confirmation or data extraction assistant. 
+                          It is important that you confirm the action's success or provide answer the user's question.
+                      You have been given the entire conversation history and the screenshot.
+                      You need to confirm the action's success or provide answer the user's question.
+                      If the screenshot is not the answer to the user's question explain the state of the desktop screen.`
+                        },
+                        ...coreMessages,
+                        {
+                          role: "user",
+                          content: [
+                            { type: "text", text: "Screenshot taken" },
+                            { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
+                          ]
+                        }
+                      ],
                     })
                   } catch (error) {
                     console.error("Error taking screenshot:", error);

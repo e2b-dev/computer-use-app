@@ -2,6 +2,8 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { openai } from '@ai-sdk/openai'
 import { google } from '@ai-sdk/google'
 import { xai } from '@ai-sdk/xai'
+import { mistral } from "@ai-sdk/mistral"
+import { groq } from "@ai-sdk/groq"
 import { customProvider } from 'ai'
 
 export const models = [
@@ -10,24 +12,48 @@ export const models = [
     modelId: "sonnet",
     description: "Anthropic Claude 3.5 Sonnet Model",
     icon: "/anthropic.svg",
+    vision: true,
+    vision_model: "sonnet",
   },
   {
     name: "GPT-4o",
     modelId: "gpt4o",
     description: "OpenAI's GPT-4o Model",
     icon: "/openai.svg",
+    vision: true,
+    vision_model: "gpt4o",
   },
   {
     name: "Gemini 2.0 Flash",
     modelId: "gemini",
     description: "Google Gemini 2.0 Flash Model",
     icon: "/google.svg",
+    vision: true,
+    vision_model: "gemini",
   },
   {
     name: "Grok 2 Vision",
     modelId: "grok",
     description: "XAI Grok 2 Vision Model",
     icon: "/xai.svg",
+    vision: true,
+    vision_model: "grok",
+  },
+  {
+    name: "Llama 3.3 70B",
+    modelId: "llama",
+    description: "Llama 3.3 70B Model",
+    icon: "/groq.svg",
+    vision: false,
+    vision_model: "llama-vision"
+  },
+  {
+    name: "Mistral Large",
+    modelId: "mistral",
+    description: "Mistral Large Model",
+    icon: "/mistral.svg",
+    vision: false,
+    vision_model: "pixtral"
   }
 ];
 
@@ -37,6 +63,12 @@ export const e2bDesktop = customProvider({
     "gpt4o": openai("gpt-4o"),
     "gemini": google("gemini-2.0-flash-001"),
     "grok": xai("grok-2-vision-1212"),
+    "mistral": mistral("mistral-large-latest"),
+    "pixtral": mistral("pixtral-large-latest"),
+    "llama": groq("llama-3.3-70b-versatile", {
+      parallelToolCalls: false
+    }),
+    "llama-vision": groq("llama-3.2-90b-vision-preview")
   }
 });
 
@@ -56,7 +88,7 @@ function getsystem(width: number, height: number, modelId: string) {
   ${modelId !== "sonnet" ? '* You can find items on the screen using the find_item_on_screen action in computer tool.' : ''}
   * Screen resolution is ${width}x${height}.
   * The system uses x86_64 architecture.
-  * You should execute one tool at a time and wait for its output before proceeding.
+  * Never perform actions concurrently. Always execute one tool at a time and wait for its output before proceeding.
   </SYSTEM_CAPABILITY>
 
   <BROWSER_USAGE>
@@ -76,6 +108,15 @@ function getsystem(width: number, height: number, modelId: string) {
   8. Answer the user's query based on the information you see on the screen using the response guidelines below.
   </BROWSER_USAGE>
 
+  <TOOLS>
+  * computerTool: Use the computer tool to interact with the system.
+  </TOOLS>
+
+  <QUERY_UNDERSTANDING>
+  * The query could be a question or a task that the user wants to perform.
+  * It could sound ambiguous or vague, but you should still try to answer it by performing the actions you can to get the information you need.
+  </QUERY_UNDERSTANDING>
+
   <RESPONSE_GUIDELINES>
   * Always respond with the exact text you see on the screen based on the action you performed and the user's query.
   * Do not hallucinate or make up information.
@@ -84,6 +125,7 @@ function getsystem(width: number, height: number, modelId: string) {
   
   <BEST_PRACTICES>
   * Never make the user perform any actions.
+  * Always take screenshots to confirm important states and actions, even in the start of the conversation.
   * Always perform actions yourself using the tools provided.
   * Always verify applications are open before interacting with them
   * Take screenshots to confirm important states and actions
@@ -109,4 +151,7 @@ export const modelsystemprompt = [{
   "anthropic": getsystem(800, 600, "sonnet"),
   "openai": getsystem(800, 600, "gpt4o"),
   "google": getsystem(800, 600, "gemini"),
+  "xai": getsystem(800, 600, "grok"),
+  "mistral": getsystem(800, 600, "mistral"),
+  "llama": getsystem(800, 600, "llama")
 }];
