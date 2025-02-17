@@ -104,40 +104,40 @@ export async function POST(request: Request) {
 
                   let confirmation;
                   try {
-
                     const visionModel = models.find(m => m.modelId === modelId)?.vision_model;
                     if (!visionModel) {
                       return { output: "Model not found" };
                     }
                     const data = await desktop.takeScreenshot();
 
-                    // map messages and and extract the messages with user and assistant role and their stringcontent
-                    const coreMessages = messages.map((m: CoreMessage) => ({
-                      role: m.role,
-                      content: typeof m.content === 'string' ? m.content : undefined
-                    }));
+                    const visionMessages = [
+                      {
+                        role: modelId === "llama" ? "user" : "system",
+                        content: `You are a screenshot confirmation or data extraction assistant. 
+                        It is important that you confirm the action's success or provide answer the user's question.
+                        You have been given the entire conversation history and the screenshot.
+                        You need to confirm the action's success or provide answer the user's question.
+                        If the screenshot is not the answer to the user's question explain the state of the desktop screen.`
+                      },
+                      ...messages.filter((m: CoreMessage) => 
+                        typeof m.content === 'string'
+                      ).map((m: CoreMessage) => ({
+                        role: m.role,
+                        content: m.content
+                      })),
+                      {
+                        role: "user",
+                        content: [
+                          { type: "text", text: "Screenshot taken" },
+                          { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
+                        ]
+                      }
+                    ];
 
                     confirmation = await generateText({
                       model: e2bDesktop.languageModel(visionModel),
                       temperature: 1,
-                      messages: [
-                        {
-                          role: modelId === "llama" ? "user" : "system",
-                          content: `You are a screenshot confirmation or data extraction assistant. 
-                          It is important that you confirm the action's success or provide answer the user's question.
-                      You have been given the entire conversation history and the screenshot.
-                      You need to confirm the action's success or provide answer the user's question.
-                      If the screenshot is not the answer to the user's question explain the state of the desktop screen.`
-                        },
-                        ...coreMessages,
-                        {
-                          role: "user",
-                          content: [
-                            { type: "text", text: "Screenshot taken" },
-                            { type: "image", image: Buffer.from(data).toString("base64"), mimeType: "image/png" },
-                          ]
-                        }
-                      ],
+                      messages: visionMessages,
                     })
                   } catch (error) {
                     console.error("Error taking screenshot:", error);
