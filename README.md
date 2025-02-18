@@ -107,7 +107,7 @@ Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
 | Gemini 2.0 Flash | ✅ | ✅ | ShowUI and OS Atlas |
 | Grok 2.0 | ✅ | ✅ | ShowUI and OS Atlas |
 | Mistral Large | Pixtral Large | ✅ | ShowUI and OS Atlas |
-| Llama 3.3 70B | Llama 3.2 90B Vision | ✅ | ShowUI and OS Atlas |
+| Llama 3.3 70B | Llama 3.2 11B Vision | ✅ | ShowUI and OS Atlas |
 
 ## Troubleshooting
 

@@ -8,6 +8,30 @@ import { customProvider } from 'ai'
 
 export const models = [
   {
+    name: "Llama 3.3 70B",
+    modelId: "llama",
+    description: "Llama 3.3 70B Model",
+    icon: "/groq.svg",
+    vision: false,
+    vision_model: "llama-vision"
+  },
+  {
+    name: "Mistral Large",
+    modelId: "mistral",
+    description: "Mistral Large Model",
+    icon: "/mistral.svg",
+    vision: false,
+    vision_model: "pixtral"
+  },
+  {
+    name: "Grok 2 Vision",
+    modelId: "grok",
+    description: "XAI Grok 2 Vision Model",
+    icon: "/xai.svg",
+    vision: true,
+    vision_model: "grok",
+  },
+  {
     name: "Claude 3.5 Sonnet",
     modelId: "sonnet",
     description: "Anthropic Claude 3.5 Sonnet Model",
@@ -31,30 +55,6 @@ export const models = [
     vision: true,
     vision_model: "gemini",
   },
-  {
-    name: "Grok 2 Vision",
-    modelId: "grok",
-    description: "XAI Grok 2 Vision Model",
-    icon: "/xai.svg",
-    vision: true,
-    vision_model: "grok",
-  },
-  {
-    name: "Llama 3.3 70B",
-    modelId: "llama",
-    description: "Llama 3.3 70B Model",
-    icon: "/groq.svg",
-    vision: false,
-    vision_model: "llama-vision"
-  },
-  {
-    name: "Mistral Large",
-    modelId: "mistral",
-    description: "Mistral Large Model",
-    icon: "/mistral.svg",
-    vision: false,
-    vision_model: "pixtral"
-  }
 ];
 
 export const e2bDesktop = customProvider({
@@ -68,7 +68,7 @@ export const e2bDesktop = customProvider({
     "llama": groq("llama-3.3-70b-versatile", {
       parallelToolCalls: false
     }),
-    "llama-vision": groq("llama-3.2-90b-vision-preview")
+    "llama-vision": groq("llama-3.2-11b-vision-preview")
   }
 });
 
@@ -115,6 +115,7 @@ function getsystem(width: number, height: number, modelId: string) {
   <QUERY_UNDERSTANDING>
   * The query could be a question or a task that the user wants to perform.
   * It could sound ambiguous or vague, but you should still try to answer it by performing the actions you can to get the information you need.
+  * Do not go to websites unless the user asks you to, always perform a google search using the actions provided.
   </QUERY_UNDERSTANDING>
 
   <RESPONSE_GUIDELINES>

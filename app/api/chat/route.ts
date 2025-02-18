@@ -6,7 +6,7 @@ import { e2bDesktop, modelsystemprompt, models } from '@/lib/model-config';
 import { ShowUIProvider } from '@/lib/showui';
 
 const TIMEOUT_MS = 600000;
-const ACTION_DELAY_MS = 2000;
+const ACTION_DELAY_MS = 4000;
 
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -116,8 +116,15 @@ export async function POST(request: Request) {
                         content: `You are a screenshot confirmation or data extraction assistant. 
                         It is important that you confirm the action's success or provide answer the user's question.
                         You have been given the entire conversation history and the screenshot.
-                        You need to confirm the action's success or provide answer the user's question.
-                        If the screenshot is not the answer to the user's question explain the state of the desktop screen.`
+                        You have to comply with the following rules:
+                        - The screenshot could be of the desktop, a website, a browser, a chat, a document, etc.
+                        - You have to explain what you see in the screenshot and how it relates to the user's question.
+                        - You need to confirm the action's success or provide answer the user's question.
+                        - If the screenshot is not the answer to the user's question explain the state of the desktop screen.
+                        - You cannot deny to answer the user's question, you have to answer it based on the screenshot.
+                        - You cannot deny to confirm the action's success, you have to confirm it based on the screenshot.
+                        - You cannot deny to provide the answer to the user's question, you have to provide it based on the screenshot.
+                        - You cannot deny to explain the state of the desktop screen, you have to explain it based on the screenshot.`
                       },
                       ...messages.filter((m: CoreMessage) => 
                         typeof m.content === 'string'
@@ -136,7 +143,7 @@ export async function POST(request: Request) {
 
                     confirmation = await generateText({
                       model: e2bDesktop.languageModel(visionModel),
-                      temperature: 1,
+                      temperature: 0.5,
                       messages: visionMessages,
                     })
                   } catch (error) {
