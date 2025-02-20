@@ -21,7 +21,7 @@ export class OSAtlasProvider {
 
   async call(prompt: string, imageData: Uint8Array): Promise<[number, number] | null> {
     if (!this.client) {
-      console.warn("Gradio client not initialized. Reinitializing...");
+      console.warn("Gradio client not initialized. Initializing...");
       await this.initializeClient();
       if (!this.client) {
         console.error("Failed to reinitialize Gradio client.");

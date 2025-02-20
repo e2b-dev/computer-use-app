@@ -250,7 +250,7 @@ export async function POST(request: Request) {
           console.log("Messages: ", event.response.messages);
         },
         onError(event): void {
-          console.error("Stream error:", event.error instanceof Error ? event.error.message : String(event.error));
+          console.error("Stream error:", event.error instanceof Error ? event.error.message : JSON.stringify(event.error));
         }
       });
 
