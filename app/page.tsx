@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { models } from "@/lib/model-config";
 import { createSandbox, increaseTimeout, stopSandboxAction } from "@/app/actions";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [sandbox, setSandbox] = useState<Sandbox | null>(null);
@@ -191,38 +192,60 @@ export default function Home() {
           {/* Controls Row */}
           <div className="flex items-center justify-between">
             {/* Left side: Timer and Clear */}
-            {sandbox && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleIncreaseTimeout}
-                  className="px-3 py-1.5 bg-[#F5F5F5] dark:bg-[#1A1A1A] hover:bg-[#EBEBEB] dark:hover:bg-[#333333] rounded-lg transition-colors flex items-center gap-2"
-                  title="Increase Time"
+            <AnimatePresence>
+              {sandbox && (
+                <motion.div 
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Timer className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
-                  <span className="text-sm font-medium text-[#000000] dark:text-[#FFFFFF]">
-                    {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-                  </span>
-                </button>
-                <button
-                  onClick={handleClearChat}
-                  className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
-                  title="Clear Chat"
-                >
-                  <Trash2 className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
-                </button>
-              </div>
-            )}
+                  <button
+                    onClick={handleIncreaseTimeout}
+                    className="px-3 py-1.5 bg-[#F5F5F5] dark:bg-[#1A1A1A] hover:bg-[#EBEBEB] dark:hover:bg-[#333333] rounded-lg transition-colors flex items-center gap-2"
+                    title="Increase Time"
+                  >
+                    <Timer className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
+                    <span className="text-sm font-medium text-[#000000] dark:text-[#FFFFFF]">
+                      {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {messages.length > 0 && !chatLoading && (
+                      <motion.button
+                        onClick={handleClearChat}
+                        className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+                        title="Clear Chat"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <Trash2 className="h-4 w-4 text-[#000000] dark:text-[#FFFFFF]" />
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {/* Right side: Stop Instance */}
-            {sandbox && (
-              <button
-                onClick={stopSandbox}
-                className="px-3 py-1.5 bg-[#1A1A1A] dark:bg-[#333333] hover:bg-[#333333] dark:hover:bg-[#444444] text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
-              >
-                <Power className="w-4 h-4" />
-                Stop Instance
-              </button>
-            )}
+            <AnimatePresence>
+              {sandbox && (
+                <motion.button
+                  onClick={stopSandbox}
+                  className="px-3 py-1.5 bg-[#1A1A1A] dark:bg-[#333333] hover:bg-[#333333] dark:hover:bg-[#444444] text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Power className="w-4 h-4" />
+                  Stop Instance
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -287,32 +310,37 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input
-              ref={inputRef}
-              className="flex-1 h-12 px-4 bg-[#FFFFFF] dark:bg-[#0A0A0A] text-[#000000] dark:text-[#FFFFFF] rounded-xl border border-[#EBEBEB] dark:border-[#333333] outline-none focus:ring-2 focus:ring-[#FF8800] transition-all duration-200 placeholder:text-[#666666] dark:placeholder:text-[#999999] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              placeholder="Send a message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              autoFocus
-              required
-              disabled={chatLoading || !sandbox}
-            />
-            <button
-              type={chatLoading ? "button" : "submit"}
-              onClick={chatLoading ? () => stop() : undefined}
-              className={`h-12 w-12 text-[#FFFFFF] rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-sm ${
-                chatLoading 
-                  ? "bg-red-500 hover:bg-red-600" 
-                  : "bg-[#FF8800] hover:bg-[#FF8800] hover:scale-[1.02]"
-              }`}
-              disabled={!sandbox}
-            >
-              {chatLoading ? (
-                <StopCircle className="w-5 h-5" />
-              ) : (
-                <PaperPlaneRight className="w-5 h-5" />
-              )}
-            </button>
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                className="w-full h-12 px-4 pr-[100px] bg-transparent text-[#000000] dark:text-[#FFFFFF] rounded-lg border border-[#EBEBEB] dark:border-[#333333] outline-none focus:ring-1 focus:ring-[#FF8800] transition-all duration-200 placeholder:text-[#666666] dark:placeholder:text-[#999999] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Send a message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                autoFocus
+                required
+                disabled={chatLoading || !sandbox}
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <button
+                  type={chatLoading ? "button" : "submit"}
+                  onClick={chatLoading ? () => stop() : undefined}
+                  className={`p-2 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    chatLoading 
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-200 dark:hover:bg-red-900/50" 
+                      : "bg-[#FF8800]/10 text-[#FF8800] hover:bg-[#FF8800]/20"
+                  }`}
+                  disabled={!sandbox}
+                  title={chatLoading ? "Stop generating" : "Send message"}
+                >
+                  {chatLoading ? (
+                    <StopCircle className="w-5 h-5" />
+                  ) : (
+                    <PaperPlaneRight weight="bold" className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       </div>

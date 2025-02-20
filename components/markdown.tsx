@@ -42,6 +42,13 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         {children}
       </span>
     ),
+    p: ({ children }: any) => {
+      return (
+        <p className="whitespace-pre-wrap break-words">
+          {children}
+        </p>
+      );
+    }
   };
 
   return (

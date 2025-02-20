@@ -99,7 +99,7 @@ function ToolInvocation({ toolPart }: { toolPart: ToolInvocationUIPart }) {
     <div
       key={toolCallId}
       className={`
-        p-2 rounded-lg text-sm
+        p-2 rounded-lg text-sm my-2
         ${state === "call" || state === "partial-call" 
           ? "bg-orange-50 dark:bg-zinc-900 border border-orange-200 dark:border-zinc-800" 
           : "bg-orange-50/50 dark:bg-zinc-900/50 border border-orange-200/50 dark:border-zinc-800/50"}
@@ -189,10 +189,10 @@ export const Message: React.FC<MessageProps> = ({ role, content, parts }) => {
           : "opacity-75"
       }`}
     >
-      <div className="shrink-0">
+      <div className="shrink-0 flex items-center">
         <div
           className={`
-            w-8 h-8 rounded-lg flex items-center justify-center
+            w-7 h-7 rounded-lg flex items-center justify-center
             ${
               role === "assistant"
                 ? "bg-[#FF8800] text-white"
@@ -204,8 +204,13 @@ export const Message: React.FC<MessageProps> = ({ role, content, parts }) => {
         </div>
       </div>
 
-      <div className="flex-1 min-w-0 space-y-3">
+      <div className="flex-1 min-w-0">
         {parts && parts.map((part, index) => renderPart(part, index))}
+        {!parts && (
+          typeof content === 'string' 
+            ? <Markdown>{content}</Markdown>
+            : content.map((c, i) => <Markdown key={i}>{c.text || ''}</Markdown>)
+        )}
       </div>
     </motion.div>
   );
