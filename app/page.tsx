@@ -5,7 +5,7 @@ import { MoonIcon, SunIcon, StopCircle, Timer, Trash2, Power } from "lucide-reac
 import { useTheme } from "next-themes";
 import { Message } from "@/components/message";
 import { useScrollToBottom } from "@/components/use-scroll-to-bottom";
-import { PaperPlaneRight } from "@phosphor-icons/react";
+import { PaperPlaneRight, GithubLogo } from "@phosphor-icons/react";
 import { useChat } from "ai/react";
 import { Sandbox } from '@/lib/sandbox';
 import { toast } from "sonner";
@@ -186,7 +186,18 @@ export default function Home() {
                 </a>
               </span>
             </h2>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <a
+                href="https://github.com/e2b-dev/computer-use-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 hover:bg-[#F5F5F5] dark:hover:bg-[#333333] rounded-lg transition-colors"
+                title="View on GitHub"
+              >
+                <GithubLogo className="w-5 h-5 text-[#000000] dark:text-[#FFFFFF]" />
+              </a>
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Controls Row */}
