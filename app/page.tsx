@@ -300,7 +300,7 @@ export default function Home() {
           className="px-6 py-4 border-t border-[#EBEBEB] dark:border-[#333333] bg-[#FCFCFC] dark:bg-[#111111]"
         >
           {messages.length === 0 && (
-            <div className="flex flex-col items-start gap-3 mb-4">
+            <div className="flex flex-col items-start gap-3 mb-2">
               <div className="flex items-center gap-2 text-[#FF8800]">
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Try these examples</span>
