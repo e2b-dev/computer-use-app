@@ -60,7 +60,9 @@ export const models = [
 export const e2bDesktop = customProvider({
   languageModels: {
     "sonnet": anthropic("claude-3-5-sonnet-20241022"),
-    "gpt4o": openai("gpt-4o"),
+    "gpt4o": openai("gpt-4o", {
+      parallelToolCalls: false,
+    }),
     "gemini": google("gemini-2.0-flash-001"),
     "grok": xai("grok-2-vision-1212"),
     "mistral": mistral("mistral-large-latest"),
