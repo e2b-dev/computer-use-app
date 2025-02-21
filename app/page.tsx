@@ -225,7 +225,7 @@ export default function Home() {
             {/* Left side: Timer and Clear */}
             <AnimatePresence>
               {sandbox && (
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-2"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -260,7 +260,7 @@ export default function Home() {
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
             {/* Right side: Stop Instance */}
             <AnimatePresence>
               {sandbox && (
@@ -295,36 +295,36 @@ export default function Home() {
           <div ref={messagesEndRef} />
         </div>
 
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center gap-3 mx-auto my-4 w-full max-w-[600px]">
+            <div className="flex items-center gap-2 text-[#FF8800]">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">Try these examples</span>
+            </div>
+            <div className="flex gap-2 justify-center w-full overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#EBEBEB] dark:scrollbar-thumb-[#333333] scrollbar-track-transparent">
+              <ExamplePrompt 
+                text="Check SF weather" 
+                onClick={() => handleExampleClick("What's the weather like in San Francisco?")}
+              />
+              <ExamplePrompt 
+                text="Find cat pictures" 
+                onClick={() => handleExampleClick("Search for cute cat pictures on the internet")}
+              />
+              <ExamplePrompt 
+                text="OpenAI news" 
+                onClick={() => handleExampleClick("Show me the latest news about OpenAI")}
+              />
+            </div>
+          </div>
+        )}
         <form
           onSubmit={handleSubmit}
           className="px-6 py-4 border-t border-[#EBEBEB] dark:border-[#333333] bg-[#FCFCFC] dark:bg-[#111111]"
         >
-          {messages.length === 0 && (
-            <div className="flex flex-col items-start gap-3 mb-2">
-              <div className="flex items-center gap-2 text-[#FF8800]">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">Try these examples</span>
-              </div>
-              <div className="flex gap-2 w-full overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#EBEBEB] dark:scrollbar-thumb-[#333333] scrollbar-track-transparent">
-                <ExamplePrompt 
-                  text="Check SF weather" 
-                  onClick={() => handleExampleClick("What's the weather like in San Francisco?")}
-                />
-                <ExamplePrompt 
-                  text="Find cat pictures" 
-                  onClick={() => handleExampleClick("Search for cute cat pictures on the internet")}
-                />
-                <ExamplePrompt 
-                  text="OpenAI news" 
-                  onClick={() => handleExampleClick("Show me the latest news about OpenAI")}
-                />
-              </div>
-            </div>
-          )}
           <div className="pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Select 
-                value={selectedModel} 
+              <Select
+                value={selectedModel}
                 onValueChange={setSelectedModel}
               >
                 <SelectTrigger className="w-[200px] h-9 bg-transparent border-[#EBEBEB] dark:border-[#333333] rounded-lg hover:bg-[#F5F5F5] dark:hover:bg-[#1A1A1A] transition-colors focus:ring-1 focus:ring-[#FF8800] focus:ring-opacity-50">
@@ -341,8 +341,8 @@ export default function Home() {
                 </SelectTrigger>
                 <SelectContent className="bg-[#FCFCFC] dark:bg-[#111111] border-[#EBEBEB] dark:border-[#333333]">
                   {models.map((model) => (
-                    <SelectItem 
-                      key={model.modelId} 
+                    <SelectItem
+                      key={model.modelId}
                       value={model.modelId}
                       className="cursor-pointer hover:bg-[#F5F5F5] dark:hover:bg-[#1A1A1A] focus:bg-[#F5F5F5] dark:focus:bg-[#1A1A1A]"
                     >
@@ -378,11 +378,10 @@ export default function Home() {
                 <button
                   type={chatLoading ? "button" : "submit"}
                   onClick={chatLoading ? () => stop() : undefined}
-                  className={`p-2 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    chatLoading 
-                      ? "bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-200 dark:hover:bg-red-900/50" 
+                  className={`p-2 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${chatLoading
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-200 dark:hover:bg-red-900/50"
                       : "bg-[#FF8800]/10 text-[#FF8800] hover:bg-[#FF8800]/20"
-                  }`}
+                    }`}
                   disabled={!sandbox}
                   title={chatLoading ? "Stop generating" : "Send message"}
                 >
