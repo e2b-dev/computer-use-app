@@ -11,27 +11,11 @@ export async function createSandbox() {
   }
 
   try {
-    // Kill any existing sandboxes
-    try {
-      const runningSandboxes = await Sandbox.list({ apiKey });
-      for (const sandboxInfo of runningSandboxes) {
-        try {
-          const sandbox = await Sandbox.connect(sandboxInfo.sandboxId);
-          await sandbox.kill();
-          console.log(`Killed running sandbox: ${sandboxInfo.sandboxId}`);
-        } catch (error) {
-          console.error(`Failed to kill running sandbox (${sandboxInfo.sandboxId}):`, error);
-        }
-      }
-    } catch (error) {
-      console.error('Error listing running sandboxes:', error);
-    }
-
     // Create new sandbox instance
     const newSandbox = await Sandbox.create("desktop-dev-v2", {
       apiKey,
       resolution: [800, 600],
-      dpi: 86,
+      dpi: 96,
       enableNoVncAuth: false,
       timeoutMs: TIMEOUT_MS
     });
